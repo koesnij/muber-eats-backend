@@ -4,10 +4,10 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
 
 @Module({
   imports: [
+    RestaurantsModule,
     GraphQLModule.forRoot({
       autoSchemaFile: true, // on memory
     }),
-    RestaurantsModule,
   ],
   controllers: [],
   providers: [],
