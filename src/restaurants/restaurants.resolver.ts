@@ -28,8 +28,14 @@ export class RestaurantResolver {
 
   @Mutation(returns => Boolean)
   async updateRestaurant(
-    @Args(/*인풋타입을 쓸때 argument 이름필요 */) data: UpdateRestaurantDto,
-  ) {
-    return true;
+    @Args('input' /*ArgsType은 이름필요없음*/) data: UpdateRestaurantDto,
+  ): Promise<boolean> {
+    try {
+      await this.restaurantService.updateRestaurant(data);
+      return true;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   }
 }

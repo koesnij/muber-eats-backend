@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateRestaurantDto } from './dtos/create-restaurant.dto';
+import { UpdateRestaurantDto } from './dtos/update-restaurant.dto';
 import { Restaurant } from './entities/restaurant.entity';
 
 @Injectable()
@@ -20,5 +21,9 @@ export class RestaurantService {
     // newRestaurant.name = createRestaurantDto.name;
     const newRestaurant = this.restaurants.create(createRestaurantDto); // 실제 DB는 안건듬(instance) & createRestaurantDto는 검증되었기때문에 바로 이렇게 사용 가능
     return this.restaurants.save(newRestaurant); // Promise
+  }
+  updateRestaurant({ id, data }: UpdateRestaurantDto) {
+    // entity가 db에 있는지 확인하지 않음
+    return this.restaurants.update(id /* {name:"aa", ... } */, { ...data });
   }
 }
