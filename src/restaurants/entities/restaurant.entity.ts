@@ -1,5 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 // @InputType() 스키마에 포함됨 -- Restaurant 이름으로 두개가 됨
@@ -16,9 +16,10 @@ export class Restaurant {
   @IsString()
   name: string;
 
-  @Field(type => Boolean)
-  @Column()
-  @IsBoolean()
+  @Field(type => Boolean, { nullable: true, defaultValue: true }) // GraphQL 스키마에서의 defaultValue
+  @Column({ default: true }) // DB에서의 defaultValue
+  @IsOptional() // Validation : 보내지 않으면 기본값으로 함
+  @IsBoolean() // Validation
   isVegan: boolean;
 
   @Field(type => String)
