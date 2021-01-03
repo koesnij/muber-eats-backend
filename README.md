@@ -2,7 +2,23 @@
 
 The Backend of Uber Eats Clone
 
-- NestJS
-  https://docs.nestjs.com/
-- GraphQL
-  https://docs.nestjs.com/graphql/quick-start
+- NestJS<br>https://docs.nestjs.com/
+- GraphQL<br>https://docs.nestjs.com/graphql/quick-start
+
+## User Model:
+
+- id
+- createdAt
+- updatedAt
+  <br>
+- email
+- password
+- role(client|owner|delivery)
+
+## User CRUD:
+
+- Create Account
+- Log In
+- See Profile
+- Edit Profile
+- Verify Email
