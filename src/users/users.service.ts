@@ -23,6 +23,7 @@ export class UsersService {
           error: '해당 이메일을 가진 사용자가 이미 존재합니다.',
         };
       }
+      // Entity Instance를 create()할 때 @BeforeInsert가 실행
       await this.users.save(this.users.create({ email, password, role })); // return nothing
       return { ok: true };
     } catch (error) {
