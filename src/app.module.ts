@@ -11,7 +11,7 @@ import { JwtModule } from './jwt/jwt.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // 앱 어디에서든지 접근 가능
+      isGlobal: true, // 앱 어디에서든지 접근 가능 (다른 모듈에서 Import 안해도됨)
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
       ignoreEnvFile: process.env.NODE_ENV === 'prod',
       validationSchema: Joi.object({
@@ -38,9 +38,9 @@ import { JwtModule } from './jwt/jwt.module';
     GraphQLModule.forRoot({
       autoSchemaFile: true, // on memory
     }),
+    JwtModule.forRoot(),
     UsersModule,
     CommonModule,
-    JwtModule,
   ],
   controllers: [],
   providers: [],
