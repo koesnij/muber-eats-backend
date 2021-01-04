@@ -20,5 +20,5 @@ export class JwtModule {
       ],
       exports: [JwtService],
     }; /* Dynamic Module */
-  }
+  } /* forRoot() 이름은 Convention */
 }
