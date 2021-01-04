@@ -57,7 +57,7 @@ export class UsersService {
         };
       }
       // const token = jwt.sign({ id: user.id }, process.env.SECRET_KEY);
-      const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY'));
+      const token = jwt.sign({ id: user.id }, this.config.get('PRIVATE_KEY'));
       return {
         ok: true,
         token,
