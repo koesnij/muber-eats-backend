@@ -43,6 +43,7 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true, // on memory
+      context: ({ req }) => ({ user: req['user'] }),
     }),
     JwtModule.forRoot({
       isGlobal: true,
