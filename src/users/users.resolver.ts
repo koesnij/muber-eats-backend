@@ -21,7 +21,8 @@ export class UsersResolver {
     @Args('input') createAccountInput: CreateAccountInput,
   ): Promise<CreateAccountOutput> {
     try {
-      return this.usersService.createAccount(createAccountInput);
+      await this.usersService.createAccount(createAccountInput);
+      return { ok: true };
     } catch (error) {
       // unexpected error
       return {
@@ -74,6 +75,7 @@ export class UsersResolver {
   ): Promise<EditProfileOutput> {
     try {
       await this.usersService.editProfile(authUser.id, editProfileInput);
+      return { ok: true };
     } catch (error) {
       return {
         ok: false,
