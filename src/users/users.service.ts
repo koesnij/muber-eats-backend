@@ -7,11 +7,14 @@ import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput } from './dtos/edit-profile.dto';
+import { Verification } from './entities/verification.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(Verification)
+    private readonly verifications: Repository<Verification>,
     private readonly jwtService: JwtService /* nestjs에서 이 클래스타입을 보고 imports에서 찾아줌 */,
   ) {}
 
@@ -28,8 +31,11 @@ export class UsersService {
           error: '해당 이메일을 가진 사용자가 이미 존재합니다.',
         };
       }
-      // Entity Instance를 create()할 때 @BeforeInsert가 실행
-      await this.users.save(this.users.create({ email, password, role })); // return nothing
+      // Entity Instance를 save()하기 전에 @BeforeInsert가 실행
+      const user = await this.users.save(
+        this.users.create({ email, password, role }),
+      );
+      await this.verifications.save(this.verifications.create({ user }));
       return { ok: true };
     } catch (error) {
       // make error
@@ -69,7 +75,11 @@ export class UsersService {
 
   async editProfile(userId: number, { email, password }: EditProfileInput) {
     const user = await this.users.findOne(userId);
-    if (email) user.email = email;
+    if (email) {
+      user.email = email;
+      user.verified = false;
+      await this.verifications.save(this.verifications.create({ user }));
+    }
     if (password) user.password = password;
     return this.users.save(user);
   }
