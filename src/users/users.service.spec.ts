@@ -62,8 +62,21 @@ describe('UsersService', () => {
   });
 
   describe('createAccount', () => {
-    it('should fail if user exists', () => {
-      /** 존재하는 유저로 속여야 함(가짜로) 모든걸 가짜로 */
+    it('should fail if user exists', async () => {
+      // user exists
+      usersRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'alalalalaal',
+      });
+      const result = await service.createAccount({
+        email: '',
+        password: '',
+        role: 0,
+      });
+      expect(result).toMatchObject({
+        ok: false,
+        error: '해당 이메일을 가진 사용자가 이미 존재합니다.',
+      });
     });
   });
 
