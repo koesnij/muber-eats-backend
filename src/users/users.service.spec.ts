@@ -8,11 +8,11 @@ import { User } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
 import { Repository } from 'typeorm';
 
-const mockRepository = {
+const mockRepository = () => ({
   findOne: jest.fn(), // creates a mock function
   save: jest.fn(),
   create: jest.fn(),
-};
+});
 
 const mockJwtService = {
   sign: jest.fn(),
@@ -37,11 +37,11 @@ describe('UsersService', () => {
         UsersService,
         {
           provide: getRepositoryToken(User), // User Entity의 Repository Token
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: getRepositoryToken(Verification),
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: JwtService,
@@ -62,21 +62,34 @@ describe('UsersService', () => {
   });
 
   describe('createAccount', () => {
+    const createAccountArgs = {
+      email: '',
+      password: '',
+      role: 0,
+    };
+
     it('should fail if user exists', async () => {
       // user exists
       usersRepository.findOne.mockResolvedValue({
         id: 1,
         email: 'alalalalaal',
       });
-      const result = await service.createAccount({
-        email: '',
-        password: '',
-        role: 0,
-      });
+      const result = await service.createAccount(createAccountArgs);
       expect(result).toMatchObject({
         ok: false,
         error: '해당 이메일을 가진 사용자가 이미 존재합니다.',
       });
+    });
+
+    it('should create a new user', async () => {
+      usersRepository.findOne.mockReturnValue(undefined); // not found
+      usersRepository.create.mockReturnValue(createAccountArgs);
+
+      await service.createAccount(createAccountArgs);
+      expect(usersRepository.create).toHaveBeenCalledTimes(1);
+      expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(createAccountArgs);
     });
   });
 
