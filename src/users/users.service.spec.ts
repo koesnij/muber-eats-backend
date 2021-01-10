@@ -15,7 +15,7 @@ const mockRepository = () => ({
 });
 
 const mockJwtService = {
-  sign: jest.fn(),
+  sign: jest.fn(() => 'signed-token!'),
   verify: jest.fn(),
 };
 
@@ -32,8 +32,9 @@ describe('UsersService', () => {
   let usersRepository: MockRepository<User>;
   let verificationRepository: MockRepository<Verification>;
   let mailService: MailService;
+  let jwtService: JwtService;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         UsersService,
@@ -56,6 +57,7 @@ describe('UsersService', () => {
       ],
     }).compile();
     service = module.get<UsersService>(UsersService);
+    jwtService = module.get<JwtService>(JwtService);
     mailService = module.get<MailService>(MailService);
     usersRepository = module.get(getRepositoryToken(User));
     verificationRepository = module.get(getRepositoryToken(Verification));
@@ -154,12 +156,45 @@ describe('UsersService', () => {
         error: '해당 이메일이 존재하지 않습니다.',
       });
     });
-    it('should fail on exception', async () => {});
+    it('should fail if the password is wrong', async () => {
+      const mockedUser = {
+        checkPassword: jest.fn(() => Promise.resolve(false)),
+      };
+      usersRepository.findOne.mockResolvedValue(mockedUser);
+      const result = await service.login(loginArgs);
+      expect(result).toEqual({
+        ok: false,
+        error: '비밀번호가 일치하지 않습니다.',
+      });
+    });
+    it('should return token if password is correct', async () => {
+      const mockedUser = {
+        id: 1,
+        checkPassword: jest.fn(() => Promise.resolve(true)),
+      };
+      usersRepository.findOne.mockResolvedValue(mockedUser);
+
+      const result = await service.login(loginArgs);
+      expect(jwtService.sign).toHaveBeenCalledTimes(1);
+      expect(jwtService.sign).toHaveBeenCalledWith(mockedUser.id);
+
+      expect(result).toEqual({
+        ok: true,
+        token: 'signed-token!',
+      });
+    });
+    it('should fail on exception', async () => {
+      const error = new Error();
+      usersRepository.findOne.mockRejectedValue(error);
+      const result = await service.login(loginArgs);
+      expect(result).toEqual({
+        ok: false,
+        error,
+      });
+    });
   });
 
   // 할 일
-  it.todo('createAccount');
-  it.todo('login');
   it.todo('findById');
   it.todo('editProfile');
   it.todo('verifyEmail');
