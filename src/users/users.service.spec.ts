@@ -127,6 +127,34 @@ describe('UsersService', () => {
 
       expect(result).toEqual({ ok: true });
     });
+
+    it('should fail on exception', async () => {
+      usersRepository.findOne.mockRejectedValue(new Error());
+      const result = await service.createAccount(createAccountArgs);
+      expect(result).toEqual({ ok: false, error: "Couldn't create account" });
+    });
+  });
+
+  describe('login', () => {
+    const loginArgs = { email: 'wha@te.ver', password: 'wha.tever' };
+    it('should fail if user does not exist', async () => {
+      usersRepository.findOne.mockResolvedValue(null);
+      const result = await service.login(loginArgs);
+      /**
+       * expect(received).toHaveBeenCalledTimes(expected)
+       * Matcher error: received value must be a mock or spy function
+       */
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(usersRepository.findOne).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+      );
+      expect(result).toEqual({
+        ok: false,
+        error: '해당 이메일이 존재하지 않습니다.',
+      });
+    });
+    it('should fail on exception', async () => {});
   });
 
   // 할 일
