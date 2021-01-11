@@ -87,22 +87,15 @@ export class UsersService {
 
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.users.findOne({ id });
-      if (user) {
-        return {
-          ok: true,
-          user,
-        };
-      } else {
-        return {
-          ok: false,
-          error: '사용자를 찾을 수 없습니다.',
-        };
-      }
+      const user = await this.users.findOneOrFail({ id }); // throw exception
+      return {
+        ok: true,
+        user,
+      };
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: '사용자를 찾을 수 없습니다.',
       };
     }
   }
