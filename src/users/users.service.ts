@@ -121,7 +121,6 @@ export class UsersService {
         ok: true,
       };
     } catch (error) {
-      console.log(error);
       return {
         ok: false,
         error,
@@ -145,13 +144,12 @@ export class UsersService {
       }
       return {
         ok: false,
-        error: 'Verification not found.',
+        error: '잘못된 인증코드입니다.',
       };
     } catch (error) {
-      console.log(error);
       return {
         ok: false,
-        error,
+        error: '잘못된 접근입니다.',
       };
     }
   }

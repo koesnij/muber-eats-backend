@@ -13,6 +13,7 @@ const mockRepository = () => ({
   save: jest.fn(),
   create: jest.fn(),
   findOneOrFail: jest.fn(),
+  delete: jest.fn(),
 });
 
 const mockJwtService = () => ({
@@ -259,7 +260,40 @@ describe('UsersService', () => {
       expect(result).toEqual({ ok: false, error: new Error() });
     });
   });
-  // 할 일
-  it.todo('editProfile');
-  it.todo('verifyEmail');
+
+  describe('verifyEmail', () => {
+    it('should verify email', async () => {
+      const mockedVerification = {
+        id: 1,
+        code: 'code',
+        user: { verified: false },
+      };
+      verificationRepository.findOne.mockResolvedValue(mockedVerification);
+      const result = await service.verifyEmail('');
+      expect(verificationRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(verificationRepository.findOne).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+      );
+
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith({ verified: true });
+
+      expect(verificationRepository.delete).toHaveBeenCalledTimes(1);
+      expect(verificationRepository.delete).toHaveBeenCalledWith(
+        mockedVerification.id,
+      );
+      expect(result).toEqual({ ok: true });
+    });
+    it('should fail on verification not found', async () => {
+      verificationRepository.findOne.mockResolvedValue(undefined);
+      const result = await service.verifyEmail('');
+      expect(result).toEqual({ ok: false, error: '잘못된 인증코드입니다.' });
+    });
+    it('should fail on exception', async () => {
+      verificationRepository.findOne.mockRejectedValue(new Error());
+      const result = await service.verifyEmail('');
+      expect(result).toEqual({ ok: false, error: '잘못된 접근입니다.' });
+    });
+  });
 });
