@@ -5,9 +5,11 @@ import { JwtService } from './jwt.service';
 
 const TOKEN = 'TOKEN';
 const TEST_KEY = 'testKey';
+const USER_ID = 1;
 
 jest.mock('jsonwebtoken', () => ({
   sign: jest.fn(() => TOKEN),
+  verify: jest.fn(() => ({ id: USER_ID })),
 }));
 
 describe('JwtService', () => {
@@ -29,14 +31,20 @@ describe('JwtService', () => {
 
   describe('sign', () => {
     it('should return a signed token', () => {
-      const ID = 1;
+      const token = service.sign(USER_ID);
 
-      const token = service.sign(ID);
       expect(jwt.sign).toHaveBeenCalledTimes(1);
-      expect(jwt.sign).toHaveBeenCalledWith({ id: ID }, TEST_KEY);
+      expect(jwt.sign).toHaveBeenCalledWith({ id: USER_ID }, TEST_KEY);
       expect(token).toEqual(TOKEN);
     });
   });
 
-  it.todo('verify');
+  describe('verify', () => {
+    it('should return the decoded token', () => {
+      const decodedToken = service.verify(TOKEN);
+      expect(jwt.verify).toHaveBeenCalledTimes(1);
+      expect(jwt.verify).toHaveBeenCalledWith(TOKEN, TEST_KEY);
+      expect(decodedToken).toEqual({ id: USER_ID });
+    });
+  });
 });
