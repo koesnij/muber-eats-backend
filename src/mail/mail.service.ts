@@ -16,7 +16,7 @@ export class MailService {
     subject: string,
     template: string,
     emailVars: EmailVars[],
-  ) {
+  ): Promise<boolean> {
     const form = new FormData();
     form.append('from', `From Muber Eats <mailgun@${this.options.domain}>`);
     form.append('to', to);
@@ -25,18 +25,20 @@ export class MailService {
     emailVars.forEach(v => form.append(`v:${v.key}`, v.value));
 
     try {
-      await got(`https://api.mailgun.net/v3/${this.options.domain}/messages`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Basic ${Buffer.from(
-            `api:${this.options.apiKey}`,
-          ).toString('base64')}`,
+      await got.post(
+        `https://api.mailgun.net/v3/${this.options.domain}/messages`,
+        {
+          headers: {
+            Authorization: `Basic ${Buffer.from(
+              `api:${this.options.apiKey}`,
+            ).toString('base64')}`,
+          },
+          body: form,
         },
-        body: form,
-      });
+      );
+      return true;
     } catch (error) {
-      /** Quietly fail : 함수 에러가 있어도 알리지 않음*/
-      console.log(error);
+      return false;
     }
   }
 

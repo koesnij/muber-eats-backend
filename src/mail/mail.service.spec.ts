@@ -1,11 +1,13 @@
+import got from 'got';
+import * as FormData from 'form-data';
 import { Test } from '@nestjs/testing';
 import { CONFIG_OPTIONS } from 'src/common/common.constants';
 import { MailService } from './mail.service';
 
-jest.mock('got', () => {});
-jest.mock('form-data', () => ({
-  append: jest.fn(),
-}));
+jest.mock('got');
+jest.mock('form-data');
+
+const TEST_DOMAIN = 'test-domain';
 
 describe('MailService', () => {
   let service: MailService;
@@ -18,7 +20,7 @@ describe('MailService', () => {
           provide: CONFIG_OPTIONS,
           useValue: {
             apiKey: 'test-apiKey',
-            domain: 'test-domain',
+            domain: TEST_DOMAIN,
             fromEmail: 'test-fromEmail',
           },
         },
@@ -38,7 +40,7 @@ describe('MailService', () => {
         email: 'email',
       };
       // spying
-      jest.spyOn(service, 'sendEmail').mockImplementation(async () => {});
+      jest.spyOn(service, 'sendEmail').mockImplementation(async () => true);
 
       // run
       service.sendVerificationEmail(
@@ -60,5 +62,25 @@ describe('MailService', () => {
     });
   });
 
-  it.todo('sendEmail');
+  describe('sendEmail', () => {
+    it('sends email', async () => {
+      const result = await service.sendEmail('', '', '', []);
+      expect(FormData.prototype.append).toHaveBeenCalled();
+
+      expect(got.post).toHaveBeenCalledTimes(1);
+      expect(got.post).toHaveBeenCalledWith(
+        `https://api.mailgun.net/v3/${TEST_DOMAIN}/messages`,
+        expect.any(Object),
+      );
+      expect(result).toEqual(true);
+    });
+
+    it('fails on error', async () => {
+      jest.spyOn(got, 'post').mockImplementation(() => {
+        throw new Error();
+      });
+      const result = await service.sendEmail('', '', '', []);
+      expect(result).toEqual(false);
+    });
+  });
 });
