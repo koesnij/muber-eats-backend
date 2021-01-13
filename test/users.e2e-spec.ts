@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { getConnection } from 'typeorm';
 
 import { AppModule } from '../src/app.module';
 
 describe('UsersModule (e2e)', () => {
   let app: INestApplication;
 
+  // migrate
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule], // whole app module
@@ -15,10 +17,16 @@ describe('UsersModule (e2e)', () => {
     await app.init();
   });
 
-  it.todo('me');
-  it.todo('UserProfile');
+  // clear
+  afterAll(async () => {
+    await getConnection().dropDatabase();
+    app.close();
+  });
+
   it.todo('createAccount');
-  it.todo('Login');
-  it.todo('editProfile');
+  it.todo('userProfile');
+  it.todo('login');
+  it.todo('me');
   it.todo('verifyEmail');
+  it.todo('editProfile');
 });
