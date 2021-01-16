@@ -29,10 +29,9 @@ export class UsersResolver {
     return this.usersService.login(loginInput);
   }
 
-  @Query(returns => UserProfileOutput)
+  @Query(returns => User)
   @UseGuards(AuthGuard)
-  me(@AuthUser() authUser: UserProfileOutput) {
-    console.log(authUser);
+  me(@AuthUser() authUser: User) {
     return authUser;
   }
 
