@@ -110,6 +110,7 @@ export class UsersService {
         // 이메일이 변경된 경우 인증 필요
         user.email = email;
         user.verified = false;
+        this.verifications.delete({ user: { id: user.id } });
         const verification = await this.verifications.save(
           this.verifications.create({ user }),
         );
