@@ -6,6 +6,7 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { Verification } from 'src/users/entities/verification.entity';
 
 jest.mock('got', () => {
   return {
@@ -23,6 +24,7 @@ const testUser = {
 describe('UsersModule (e2e)', () => {
   let app: INestApplication;
   let usersRepository: Repository<User>;
+  let verificationsRepository: Repository<Verification>;
   let jwtToken: string;
 
   beforeAll(async () => {
@@ -32,6 +34,9 @@ describe('UsersModule (e2e)', () => {
 
     app = module.createNestApplication();
     usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    verificationsRepository = module.get<Repository<Verification>>(
+      getRepositoryToken(Verification),
+    );
     await app.init();
   });
 
@@ -326,6 +331,60 @@ describe('UsersModule (e2e)', () => {
     });
   });
 
-  it.todo('verifyEmail');
-  it.todo('editProfile');
+  describe('verifyEmail', () => {
+    let verificationCode: string;
+    beforeAll(async () => {
+      const [verification] = await verificationsRepository.find();
+      verificationCode = verification.code;
+    });
+    it('should verify email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+            mutation {
+              verifyEmail(input: { code: "${verificationCode}" }) {
+                ok
+                error
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: { verifyEmail },
+            },
+          } = res;
+          expect(verifyEmail.ok).toBe(true);
+          expect(verifyEmail.error).toBe(null);
+        });
+    });
+
+    it('should fail on verification code not found', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+          mutation {
+            verifyEmail(input: { code: "WRONG CODE!" }) {
+              ok
+              error
+            }
+          }
+        `,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: { verifyEmail },
+            },
+          } = res;
+          expect(verifyEmail.ok).toBe(false);
+          expect(verifyEmail.error).toBe('잘못된 인증코드입니다.');
+        });
+    });
+  });
 });
