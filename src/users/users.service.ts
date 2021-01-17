@@ -107,12 +107,18 @@ export class UsersService {
     try {
       const user = await this.users.findOne(userId);
       if (email) {
-        // 이메일이 변경된 경우 인증 필요
+        const exists = await this.users.findOne({ email });
+        if (exists) {
+          return {
+            ok: false,
+            error: '이미 사용 중인 이메일입니다.',
+          };
+        }
         user.email = email;
         user.verified = false;
         this.verifications.delete({ user: { id: user.id } });
         const verification = await this.verifications.save(
-          this.verifications.create({ user }),
+          this.verifications.create({ user }), // 이메일이 변경된 경우 인증 필요
         );
         this.mailService.sendVerificationEmail(user.email, verification.code);
       }

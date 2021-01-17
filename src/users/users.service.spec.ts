@@ -220,14 +220,24 @@ describe('UsersService', () => {
       const newVerification = { code: 'code' };
       const newUser = { verified: false, email: editProfileArgs.input.email };
 
-      usersRepository.findOne.mockResolvedValue(oldUser);
+      usersRepository.findOne
+        .mockResolvedValueOnce(oldUser) // find user
+        .mockResolvedValue(null); // find user failed
       verificationRepository.create.mockReturnValue(newVerification); // create doesnt return a promise
       verificationRepository.save.mockResolvedValue(newVerification); // create doesnt return a promise
 
-      await service.editProfile(editProfileArgs.userId, editProfileArgs.input);
-      expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
-      expect(usersRepository.findOne).toHaveBeenCalledWith(
+      const result = await service.editProfile(
         editProfileArgs.userId,
+        editProfileArgs.input,
+      );
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(2);
+      expect(usersRepository.findOne).toHaveBeenNthCalledWith(
+        1,
+        editProfileArgs.userId,
+      );
+      expect(usersRepository.findOne).toHaveBeenNthCalledWith(
+        2,
+        editProfileArgs.input,
       );
 
       expect(verificationRepository.create).toHaveBeenCalledWith({
@@ -239,6 +249,7 @@ describe('UsersService', () => {
         newUser.email,
         newVerification.code,
       );
+      expect(result).toEqual({ ok: true });
     });
 
     it('shoud change password', async () => {
@@ -252,6 +263,38 @@ describe('UsersService', () => {
       expect(usersRepository.save).toHaveBeenCalledTimes(1);
       expect(usersRepository.save).toHaveBeenCalledWith(editProfileArgs.input);
       expect(result).toEqual({ ok: true });
+    });
+
+    it('should fail if email is duplicated', async () => {
+      const oldUser = { email: 'a@old.com', verified: true };
+      const editProfileArgs = { userId: 1, input: { email: 'a@old.com' } };
+
+      usersRepository.findOne.mockResolvedValue(oldUser);
+      const result = await service.editProfile(
+        editProfileArgs.userId,
+        editProfileArgs.input,
+      );
+
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(2);
+      expect(usersRepository.findOne).toHaveBeenNthCalledWith(
+        1,
+        editProfileArgs.userId,
+      );
+      expect(usersRepository.findOne).toHaveBeenNthCalledWith(
+        2,
+        editProfileArgs.input,
+      );
+
+      expect(verificationRepository.delete).toHaveBeenCalledTimes(0);
+      expect(verificationRepository.save).toHaveBeenCalledTimes(0);
+      expect(verificationRepository.create).toHaveBeenCalledTimes(0);
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledTimes(0);
+      expect(usersRepository.save).toHaveBeenCalledTimes(0);
+
+      expect(result).toEqual({
+        ok: false,
+        error: '이미 사용 중인 이메일입니다.',
+      });
     });
 
     it('should fail on exception', async () => {

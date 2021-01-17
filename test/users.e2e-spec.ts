@@ -274,7 +274,6 @@ describe('UsersModule (e2e)', () => {
         });
     });
     it('should have new email', () => {
-      console.log(jwtToken);
       return privateTest(`
             {
               me {
@@ -290,6 +289,28 @@ describe('UsersModule (e2e)', () => {
             },
           } = res;
           expect(me.email).toBe(NEW_EMAIL);
+        });
+    });
+    it('should fail if email is duplicated', () => {
+      return privateTest(`
+          mutation {
+            editProfile(input: {
+              email: "${NEW_EMAIL}"
+            }) {
+              ok
+              error
+            }
+          }
+        `)
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: { editProfile },
+            },
+          } = res;
+          expect(editProfile.ok).toBe(false);
+          expect(editProfile.error).toBe('이미 사용 중인 이메일입니다.');
         });
     });
   });
