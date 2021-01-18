@@ -4,9 +4,10 @@ import { IsString, Length } from 'class-validator';
 
 import { CoreEntity } from 'src/common/entities/core.entity';
 import { Category } from './category.entity';
+import { User } from 'src/users/entities/user.entity';
 
 // @InputType() 스키마에 포함됨 -- Restaurant 이름으로 두개가 됨
-@InputType({ isAbstract: true }) //스키마 등록 X, 그냥 extend
+@InputType('RestaurantInputType', { isAbstract: true }) //스키마 등록 X, 그냥 extend
 @ObjectType()
 @Entity()
 export class Restaurant extends CoreEntity {
@@ -26,7 +27,14 @@ export class Restaurant extends CoreEntity {
   @IsString()
   address: string;
 
-  @ManyToOne(type => Category, category => category.restaurants)
-  @Field(type => Category)
+  @Field(type => Category, { nullable: true }) // 카테고리가 삭제되어도 레스토랑은 삭제되면 안됨.
+  @ManyToOne(type => Category, category => category.restaurants, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   category: Category;
+
+  @Field(type => User)
+  @ManyToOne(type => User, user => user.restaurants)
+  owner: User;
 }
