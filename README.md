@@ -38,3 +38,16 @@ The Backend of Uber Eats Clone
 
 - Unit Testing
 - E2E Testing
+
+---
+
+### Restaurant Entity:
+
+- id
+- createdAt
+- updatedAt
+  <br>
+- name
+- category
+- address
+- coverImage
