@@ -14,10 +14,14 @@ export class Category extends CoreEntity {
   @Length(5)
   name: string;
 
-  @Field(type => String)
-  @Column()
+  @Field(type => String, { nullable: true })
+  @Column({ nullable: true })
   @IsString()
   coverImg: string;
+
+  @Field(type => String)
+  @Column({ unique: true })
+  slug: string;
 
   @Field(type => [Restaurant])
   @OneToMany(type => Restaurant, restaurant => restaurant.category)
