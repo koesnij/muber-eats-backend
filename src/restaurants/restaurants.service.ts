@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { CreateRestaurantDto } from './dtos/create-restaurant.dto';
-import { UpdateRestaurantDto } from './dtos/update-restaurant.dto';
+import {
+  CreateRestaurantInput,
+  CreateRestaurantOutput,
+} from './dtos/create-restaurant.dto';
 import { Restaurant } from './entities/restaurant.entity';
 
 @Injectable()
@@ -14,16 +17,19 @@ export class RestaurantService {
   getAll(): Promise<Restaurant[]> {
     return this.restaurants.find();
   }
-  createRestaurant(
-    createRestaurantDto: CreateRestaurantDto,
-  ): Promise<Restaurant> {
-    // const newRestaurant = new Restaurant();
-    // newRestaurant.name = createRestaurantDto.name;
-    const newRestaurant = this.restaurants.create(createRestaurantDto); // 실제 DB는 안건듬(instance) & createRestaurantDto는 검증되었기때문에 바로 이렇게 사용 가능
-    return this.restaurants.save(newRestaurant); // Promise
-  }
-  updateRestaurant({ id, data }: UpdateRestaurantDto) {
-    // entity가 db에 있는지 확인하지 않음
-    return this.restaurants.update(id /* {name:"aa", ... } */, { ...data });
+  async createRestaurant(
+    owner: User,
+    createRestaurantInput: CreateRestaurantInput,
+  ): Promise<CreateRestaurantOutput> {
+    try {
+      const newRestaurant = this.restaurants.create(createRestaurantInput);
+      await this.restaurants.save(newRestaurant); // Promise
+      return { ok: true };
+    } catch {
+      return {
+        ok: false,
+        error: '레스토랑을 생성할 수 없습니다.',
+      };
+    }
   }
 }
