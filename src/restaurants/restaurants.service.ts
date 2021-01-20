@@ -12,31 +12,18 @@ import {
 } from './dtos/edit-restaurant.dto';
 import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
+import { CategoryRepository } from './repositories/category.repository';
 
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurants: Repository<Restaurant>,
-    @InjectRepository(Category)
-    private readonly categories: Repository<Category>,
+    // @InjectRepository(Category)
+    private readonly categories: CategoryRepository,
   ) {}
   getAll(): Promise<Restaurant[]> {
     return this.restaurants.find();
-  }
-
-  async getOrCreateCategory(name: string): Promise<Category> {
-    const categoryName = name.trim().toLowerCase().replace(/ +/g, ' ');
-    const categorySlug = categoryName.replace(/ /g, '-');
-
-    let category = await this.categories.findOne({ slug: categorySlug });
-    if (!category) {
-      category = await this.categories.save(
-        this.categories.create({ slug: categorySlug, name: categoryName }),
-      );
-    }
-
-    return category;
   }
 
   async createRestaurant(
@@ -47,7 +34,7 @@ export class RestaurantService {
       const newRestaurant = this.restaurants.create(createRestaurantInput);
 
       newRestaurant.owner = owner;
-      newRestaurant.category = await this.getOrCreateCategory(
+      newRestaurant.category = await this.categories.getOrCreate(
         createRestaurantInput.categoryName,
       );
       await this.restaurants.save(newRestaurant);
@@ -85,6 +72,12 @@ export class RestaurantService {
         };
       }
 
+      if (name) restaurant.name = name;
+      if (address) restaurant.address = address;
+      if (coverImg) restaurant.coverImg = coverImg;
+      if (categoryName)
+        restaurant.category = await this.categories.getOrCreate(categoryName);
+      await this.restaurants.save(restaurant);
       return { ok: true };
     } catch (error) {
       return { ok: false, error: 'Unexpected Error' };
