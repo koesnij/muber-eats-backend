@@ -24,6 +24,21 @@ export class RestaurantService {
   getAll(): Promise<Restaurant[]> {
     return this.restaurants.find();
   }
+
+  async getOrCreateCategory(name: string): Promise<Category> {
+    const categoryName = name.trim().toLowerCase().replace(/ +/g, ' ');
+    const categorySlug = categoryName.replace(/ /g, '-');
+
+    let category = await this.categories.findOne({ slug: categorySlug });
+    if (!category) {
+      category = await this.categories.save(
+        this.categories.create({ slug: categorySlug, name: categoryName }),
+      );
+    }
+
+    return category;
+  }
+
   async createRestaurant(
     owner: User,
     createRestaurantInput: CreateRestaurantInput,
@@ -31,20 +46,10 @@ export class RestaurantService {
     try {
       const newRestaurant = this.restaurants.create(createRestaurantInput);
 
-      const categoryName = createRestaurantInput.categoryName
-        .trim()
-        .toLowerCase()
-        .replace(/ +/g, ' ');
-      const categorySlug = categoryName.replace(/ /g, '-');
-      let category = await this.categories.findOne({ slug: categorySlug });
-      if (!category) {
-        category = await this.categories.save(
-          this.categories.create({ slug: categorySlug, name: categoryName }),
-        );
-      }
-      newRestaurant.category = category;
       newRestaurant.owner = owner;
-
+      newRestaurant.category = await this.getOrCreateCategory(
+        createRestaurantInput.categoryName,
+      );
       await this.restaurants.save(newRestaurant);
       return { ok: true };
     } catch {
@@ -57,8 +62,32 @@ export class RestaurantService {
 
   async editRestaurant(
     owner: User,
-    editRestaurantInput: EditRestaurantInput,
+    {
+      restaurantId,
+      name,
+      address,
+      coverImg,
+      categoryName,
+    }: EditRestaurantInput,
   ): Promise<EditRestaurantOutput> {
-    return { ok: true };
+    try {
+      const restaurant = await this.restaurants.findOne(restaurantId);
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: '존재하지 않는 레스토랑입니다.',
+        };
+      }
+      if (owner.id !== restaurant.ownerId) {
+        return {
+          ok: false,
+          error: '이 레스토랑을 수정할 권한이 없습니다.',
+        };
+      }
+
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: 'Unexpected Error' };
+    }
   }
 }
