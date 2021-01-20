@@ -22,11 +22,11 @@ export class RestaurantResolver {
   @Mutation(returns => CreateRestaurantOutput)
   @Role(['Owner'])
   async createRestaurant(
-    @AuthUser() authUser: User,
+    @AuthUser() owner: User,
     @Args('input') createRestaurantInput: CreateRestaurantInput,
   ): Promise<CreateRestaurantOutput> /* return promise */ {
     return this.restaurantService.createRestaurant(
-      authUser,
+      owner,
       createRestaurantInput,
     );
   }

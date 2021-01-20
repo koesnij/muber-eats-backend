@@ -72,12 +72,14 @@ export class RestaurantService {
         };
       }
 
+      /** 데이터베이스에 변경사항 반영 */
       if (name) restaurant.name = name;
       if (address) restaurant.address = address;
       if (coverImg) restaurant.coverImg = coverImg;
       if (categoryName)
         restaurant.category = await this.categories.getOrCreate(categoryName);
       await this.restaurants.save(restaurant);
+
       return { ok: true };
     } catch (error) {
       return { ok: false, error: 'Unexpected Error' };
