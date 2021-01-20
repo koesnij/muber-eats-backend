@@ -55,12 +55,12 @@ The Backend of Uber Eats Clone
 ### Restaurant CRUD:
 
 - [x] Create Restaurant
-- [ ] Edit Restaurant
-- [ ] Delete Restaurant
+- [x] Edit Restaurant
+- [x] Delete Restaurant
 - [ ] See Restaurants (pagination)
 - [ ] See Restaurant (detail)
 
-- [ ] See Categories
+- [x] See Categories
 - [ ] See Restaurants by Category (pagination)
 
 - [ ] Create Dish

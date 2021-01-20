@@ -18,9 +18,10 @@ import {
 import { User } from 'src/users/entities/user.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
+import { AllCategoriesOutput } from './dtos/all-categories.dto';
 
 @Injectable()
-export class RestaurantService {
+export class RestaurantsService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurants: Repository<Restaurant>,
@@ -110,6 +111,19 @@ export class RestaurantService {
       return {
         ok: false,
         error: '레스토랑을 삭제할 수 없습니다.',
+      };
+    }
+  }
+
+  /** Categories Service */
+  async allCategories(): Promise<AllCategoriesOutput> {
+    try {
+      const categories = await this.categories.find();
+      return { ok: true, categories };
+    } catch {
+      return {
+        ok: false,
+        error: '카테고리를 불러올 수 없습니다.',
       };
     }
   }
