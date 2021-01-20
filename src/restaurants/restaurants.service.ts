@@ -16,6 +16,7 @@ import {
 } from './dtos/edit-restaurant.dto';
 
 import { User } from 'src/users/entities/user.entity';
+import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
@@ -126,5 +127,9 @@ export class RestaurantsService {
         error: '카테고리를 불러올 수 없습니다.',
       };
     }
+  }
+
+  countRestaurants(category: Category): Promise<number> {
+    return this.restaurants.count({ category });
   }
 }
