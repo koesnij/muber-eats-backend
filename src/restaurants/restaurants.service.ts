@@ -21,6 +21,9 @@ import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
+import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
+
+const PAGE_SIZE = 25;
 
 @Injectable()
 export class RestaurantsService {
@@ -117,6 +120,26 @@ export class RestaurantsService {
     }
   }
 
+  async allRestaurants({ page }: RestaurantsInput): Promise<RestaurantsOutput> {
+    try {
+      const [results, totalResults] = await this.restaurants.findAndCount({
+        skip: (page - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+      });
+      return {
+        ok: true,
+        results,
+        totalResults,
+        totalPages: Math.ceil(totalResults / PAGE_SIZE),
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '레스토랑을 조회할 수 없습니다.',
+      };
+    }
+  }
+
   /** Categories Service */
   async allCategories(): Promise<AllCategoriesOutput> {
     try {
@@ -146,16 +169,18 @@ export class RestaurantsService {
           error: '존재하지 않는 카테고리입니다.',
         };
       }
-      category.restaurants = await this.restaurants.find({
+      const [restaurants, totalResults] = await this.restaurants.findAndCount({
         where: { category },
-        take: 25,
-        skip: (page - 1) * 25,
+        take: PAGE_SIZE,
+        skip: (page - 1) * PAGE_SIZE,
       });
 
+      category.restaurants = restaurants;
       return {
         ok: true,
         category,
-        totalPages: Math.ceil((await this.countRestaurants(category)) / 25),
+        totalResults,
+        totalPages: Math.ceil(totalResults / PAGE_SIZE),
       };
     } catch {
       return {

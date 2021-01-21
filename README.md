@@ -2,6 +2,10 @@
 
 The Backend of Uber Eats Clone
 
+[정리노트](https://github.com/koesnij/muber-eats-backend/tree/master/lecture)
+
+<br>
+
 ## Tech Stack
 
 - NestJS
@@ -13,6 +17,8 @@ The Backend of Uber Eats Clone
   <br>https://typeorm.io/#/
 - PostgreSQL
   <br>https://www.postgresql.org/docs/
+
+<br>
 
 ## Structure
 
@@ -49,7 +55,7 @@ E2E Testing
 - [x] Edit Profile
 - [x] Verify Email
 
----
+<br>
 
 ### Restaurant Entity:
 
@@ -68,7 +74,8 @@ Restaurant
 - [x] Create Restaurant
 - [x] Edit Restaurant
 - [x] Delete Restaurant
-- [ ] See Restaurants (pagination)
+- [x] See Restaurants (pagination)
+- [ ] Search Restaurant
 - [ ] See Restaurant (detail)
 
 Category
