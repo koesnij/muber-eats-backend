@@ -20,6 +20,7 @@ import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 
 @Injectable()
 export class RestaurantsService {
@@ -131,5 +132,28 @@ export class RestaurantsService {
 
   countRestaurants(category: Category): Promise<number> {
     return this.restaurants.count({ category });
+  }
+
+  async findCategoryBySlug({ slug }: CategoryInput): Promise<CategoryOutput> {
+    try {
+      const category = await this.categories.findOne(
+        { slug },
+        { relations: ['restaurants'] },
+      );
+      if (!category) {
+        return {
+          ok: false,
+          error: '존재하지 않는 카테고리입니다.',
+        };
+      }
+      return {
+        ok: true,
+        category,
+      };
+    } catch {
+      return {
+        ok: false,
+      };
+    }
   }
 }

@@ -21,7 +21,6 @@ The Backend of Uber Eats Clone
 - id
 - createdAt
 - updatedAt
-  <br>
 - email
 - password
 - role (client | owner | delivery)
@@ -30,14 +29,25 @@ The Backend of Uber Eats Clone
 
 - [x] Create Account
 - [x] Log In
+- [x] Me
 - [x] See Profile
 - [x] Edit Profile
 - [x] Verify Email
 
 ### User Testing:
 
-- Unit Testing
-- E2E Testing
+Unit Testing
+
+- [x] Users Service (100/100)
+
+E2E Testing
+
+- [x] Create Account
+- [x] Log In
+- [x] Me
+- [x] See Profile
+- [x] Edit Profile
+- [x] Verify Email
 
 ---
 
@@ -46,7 +56,6 @@ The Backend of Uber Eats Clone
 - id
 - createdAt
 - updatedAt
-  <br>
 - name
 - category
 - address
@@ -65,7 +74,7 @@ Restaurant
 Category
 
 - [x] See Categories
-- [ ] See Restaurants by Category (pagination)
+- [x] See Restaurants by Category (pagination)
 
 Dish
 
