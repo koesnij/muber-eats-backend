@@ -75,8 +75,8 @@ Restaurant
 - [x] Edit Restaurant
 - [x] Delete Restaurant
 - [x] See Restaurants (pagination)
-- [ ] Search Restaurant
-- [ ] See Restaurant (detail)
+- [x] Search Restaurant
+- [x] See Restaurant (detail)
 
 Category
 
@@ -88,3 +88,16 @@ Dish
 - [ ] Create Dish
 - [ ] Edit Dish
 - [ ] Delete Dish
+
+<br>
+
+### Orders:
+
+- Orders CRUD
+- Orders Subscription (for Owner, Client, Delivery)
+
+<br>
+
+### Payments:
+
+- CRON
