@@ -9,7 +9,7 @@ import { Restaurant } from './restaurant.entity';
 @Entity()
 export class Category extends CoreEntity {
   @Field(type => String)
-  @Column()
+  @Column({ unique: true })
   @IsString()
   @Length(5)
   name: string;

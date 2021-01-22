@@ -1,10 +1,11 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, RelationId } from 'typeorm';
 import { IsString, Length } from 'class-validator';
 
 import { CoreEntity } from 'src/common/entities/core.entity';
 import { Category } from './category.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Dish } from './dish.entity';
 
 // @InputType() 스키마에 포함됨 -- Restaurant 이름으로 두개가 됨
 @InputType('RestaurantInputType', { isAbstract: true }) //스키마 등록 X, 그냥 extend
@@ -40,4 +41,8 @@ export class Restaurant extends CoreEntity {
 
   @RelationId((restaurant: Restaurant) => restaurant.owner)
   ownerId: number;
+
+  @Field(type => [Dish])
+  @OneToMany(type => Dish, dish => dish.restaurant)
+  menu: Dish[];
 }
