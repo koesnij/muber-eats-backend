@@ -29,6 +29,8 @@ import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
 import { Dish } from './entities/dish.entity';
+import { EditDishInput, EditDishOutput } from './dtos/edit-dish.dto';
+import { DeleteDishInput, DeleteDishOutput } from './dtos/delete-dish.dto';
 
 const PAGE_SIZE = 25;
 
@@ -264,6 +266,54 @@ export class RestaurantsService {
       return { ok: true };
     } catch (error) {
       return { ok: false, error: 'Dish를 생성할 수 없습니다.' };
+    }
+  }
+
+  async editDish(
+    owner: User,
+    editDishInput: EditDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      const dish = await this.dishes.findOne(editDishInput.dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return { ok: false, error: 'Dish not found' };
+      }
+      if (dish.restaurant.ownerId !== owner.id) {
+        return { ok: false, error: '수정할 권한이 없습니다.' };
+      }
+
+      await this.dishes.save([
+        {
+          id: editDishInput.dishId,
+          ...editDishInput,
+        },
+      ]);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Could not update dish.' };
+    }
+  }
+
+  async deleteDish(
+    owner: User,
+    { dishId }: DeleteDishInput,
+  ): Promise<DeleteDishOutput> {
+    try {
+      const dish = await this.dishes.findOne(dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return { ok: false, error: 'Dish not found' };
+      }
+      if (dish.restaurant.ownerId !== owner.id) {
+        return { ok: false, error: '수정할 권한이 없습니다.' };
+      }
+      await this.dishes.delete(dishId);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Could not delete dish.' };
     }
   }
 }
