@@ -22,12 +22,13 @@ import {
   SearchRestaurantInput,
   SearchRestaurantOutput,
 } from './dtos/search-reataurant.dto';
+import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
 
 import { User } from 'src/users/entities/user.entity';
 import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
-import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
+import { Dish } from './entities/dish.entity';
 
 const PAGE_SIZE = 25;
 
@@ -38,6 +39,8 @@ export class RestaurantsService {
     private readonly restaurants: Repository<Restaurant>,
     // @InjectRepository(Category)
     private readonly categories: CategoryRepository,
+    @InjectRepository(Dish)
+    private readonly dishes: Repository<Dish>,
   ) {}
   getAll(): Promise<Restaurant[]> {
     return this.restaurants.find();
@@ -244,9 +247,23 @@ export class RestaurantsService {
     createDishInput: CreateDishInput,
   ): Promise<CreateDishOutput> {
     try {
+      const restaurant = await this.restaurants.findOne(
+        createDishInput.restaurantId,
+      );
+      if (!restaurant) {
+        return { ok: false, error: '존재하지 않는 레스토랑입니다.' };
+      }
+      if (restaurant.ownerId !== owner.id) {
+        return { ok: false, error: '이 레스토랑을 수정할 권한이 없습니다.' };
+      }
+
+      const dish = await this.dishes.save(
+        this.dishes.create({ ...createDishInput, restaurant }),
+      );
+
       return { ok: true };
     } catch (error) {
-      return { ok: false };
+      return { ok: false, error: 'Dish를 생성할 수 없습니다.' };
     }
   }
 }
