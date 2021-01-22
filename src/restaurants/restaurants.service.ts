@@ -27,6 +27,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
+import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
 
 const PAGE_SIZE = 25;
 
@@ -149,7 +150,9 @@ export class RestaurantsService {
     restaurantId,
   }: RestaurantInput): Promise<RestaurantOutput> {
     try {
-      const restaurant = await this.restaurants.findOne(restaurantId);
+      const restaurant = await this.restaurants.findOne(restaurantId, {
+        relations: ['menu'],
+      });
       if (!restaurant) {
         throw new Error();
       }
@@ -186,7 +189,7 @@ export class RestaurantsService {
     }
   }
 
-  /** Categories Service */
+  /** Categories CRUD */
   async allCategories(): Promise<AllCategoriesOutput> {
     try {
       const categories = await this.categories.find();
@@ -232,6 +235,18 @@ export class RestaurantsService {
       return {
         ok: false,
       };
+    }
+  }
+
+  /* Dishes CRUD */
+  async createDish(
+    owner: User,
+    createDishInput: CreateDishInput,
+  ): Promise<CreateDishOutput> {
+    try {
+      return { ok: true };
+    } catch (error) {
+      return { ok: false };
     }
   }
 }
