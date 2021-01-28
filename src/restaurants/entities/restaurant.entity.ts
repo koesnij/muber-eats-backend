@@ -6,6 +6,7 @@ import { CoreEntity } from 'src/common/entities/core.entity';
 import { Category } from './category.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Dish } from './dish.entity';
+import { Order } from 'src/orders/entities/order.entity';
 
 // @InputType() 스키마에 포함됨 -- Restaurant 이름으로 두개가 됨
 @InputType('RestaurantInputType', { isAbstract: true }) //스키마 등록 X, 그냥 extend
@@ -45,4 +46,8 @@ export class Restaurant extends CoreEntity {
   @Field(type => [Dish])
   @OneToMany(type => Dish, dish => dish.restaurant)
   menu: Dish[];
+
+  @Field(type => [Order])
+  @OneToMany(type => Order, order => order.restaurant)
+  orders: Order[];
 }
